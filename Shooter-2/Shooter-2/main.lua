@@ -1,17 +1,27 @@
+-- Move over this program to multi-file format for.
+-- Display score and lives.
+-- adjust enemy spawns
+-- make aditional enemy types that will hover above and shoot bullets at the player 
+-- heat seeking missiles
+-- Boss battle.
+-- 
+
 debug = true
 
 math.randomseed(os.time()) -- generates the time of operation system 
 
 player = { x = 200, y = 710, speed = 150, img = nil }
 enemy = {x =0, y=0, speed = 150, img = nil}
+bullet = {img = nil}
 
 
+-- local playerDead = false
 -- Timers
 -- We declare these here so we don't have to edit them multiple places
 canShoot = true
 canShootTimerMax = 0.2 
 canShootTimer = canShootTimerMax
-
+enemyDead = false
 -- Image Storage
 bulletImg = nil
 
@@ -21,9 +31,18 @@ bullets = {} -- array of current bullets being drawn and updated
 
 -- Loading
 function love.load(arg)
+
+
 	player.img = love.graphics.newImage('assets/plane.png')
 	bulletImg = love.graphics.newImage('assets/bullet.png')
 	enemy.img = love.graphics.newImage('assets/enemy.png')
+	bullet.img = love.graphics.newImage('assets/bullet.png')
+
+	enemy.width = enemy.img:getWidth()
+	enemy.height = enemy.img:getHeight()
+	bullet.width = bullet.img:getWidth()
+	bullet.height = bullet.img:getHeight()
+
 	
 	enemies = {}
 
@@ -36,6 +55,7 @@ function love.load(arg)
 				img = love.graphics.newImage("assets/enemy.png")
 			}
 		)
+	
 	end
 end
 
@@ -62,17 +82,20 @@ function love.update(dt)
 	for i, bullet in ipairs(bullets) do
 		bullet.y = bullet.y - (250 * dt)
 
+		bullet.checkCollision(enemies)
+
 		if bullet.y < 0 then -- remove bullets when they pass off the screen
 			table.remove(bullets, i)
 		end
 	end
 
-	if love.keyboard.isDown(' ', 'rctrl', 'lctrl', 'ctrl') and canShoot then
+	if love.keyboard.isDown('space', 'rctrl', 'lctrl', 'ctrl') and canShoot then
 		-- Create some bullets
 		newBullet = { x = player.x + (player.img:getWidth()/2), y = player.y, img = bulletImg }
 		table.insert(bullets, newBullet)
 		canShoot = false
 		canShootTimer = canShootTimerMax
+		
 	end
 
 	if love.keyboard.isDown('left','a') then
@@ -97,4 +120,27 @@ function love.draw(dt)
 	love.graphics.draw(player.img, player.x, player.y)
 end
 
+function checkCollision(bullets, enemy)
+	local enemy_bottom_left = enemy.x
+	local enemy_bottom_right = enemy_bottom.x + enemy_bottom.width
+	local enemy_bottom_top = enemy_bottom.y
+	local enemy_bottom = enemy_bottom.y + enemy_bottom.height
+  
+	local bullet_left = bullet.x
+	local bullet_right = bullet.x + bullet.width
+	local bullet_top = bullet.y
+	local bullet_bottom = bullet.y + bullet.height
+  
+	if enemy_bottom_right > obj_left and
+	enemy_bottom_left < obj_right and
+	enemy_bottom_bottom > obj_top and
+	enemy_bottom_top < obj_bottom then
+		  enemy_bottom.enemyDead = true
+  
+		  --Increase enemy speed
+		  if enemy_bottom.enemyDead == true then
+			 table.remove(enemy)
+		  end 
+	  end
+  end 
 
